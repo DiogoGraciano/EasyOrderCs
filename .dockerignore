@@ -1,0 +1,40 @@
+# Git
+.git
+.gitignore
+
+# IDEs
+.vs
+.vscode
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+*.cache
+
+# Docker (não excluir Dockerfile e docker-compose.yml)
+.dockerignore
+
+# Node modules (do projeto JS)
+EasyOrderJs/node_modules
+EasyOrderJs/dist
+EasyOrderJs/build
+
+# Logs
+*.log
+logs/
+
+# Outros
+*.dbmdl
+*.jfm
+charts/
+secrets.dev.yaml
+values.dev.yaml
+README.md
+

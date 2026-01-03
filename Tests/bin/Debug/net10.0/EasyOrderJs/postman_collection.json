@@ -1,0 +1,2146 @@
+{
+  "info": {
+    "_postman_id": "12345678-1234-1234-1234-123456789012",
+    "name": "Easy Order API - Validações Completas",
+    "description": "# Easy Order API - Documentação Completa\n\nEsta coleção contém todos os endpoints da API Easy Order com exemplos de requisições de sucesso e validações de erro.\n\n## 📋 Sobre a API\n\nA Easy Order API é uma API REST construída com NestJS para gerenciamento de pedidos, clientes, empresas e produtos.\n\n## 🚀 Configuração\n\n1. Configure a variável `baseUrl` com a URL da sua API (padrão: `http://localhost:3000`)\n2. Execute primeiro as requisições de autenticação (register/login) para obter o token JWT\n3. O token é automaticamente salvo na variável `access_token` após login/registro\n4. Execute as requisições na ordem sugerida para criar os recursos necessários\n5. Os IDs são automaticamente salvos nas variáveis de ambiente após requisições de sucesso\n\n## 🔐 Autenticação\n\nA maioria dos endpoints requer autenticação via JWT. Use o header:\n```\nAuthorization: Bearer {{access_token}}\n```\n\n## 📚 Estrutura da Coleção\n\n- **🔐 Auth**: Autenticação e autorização\n- **🏢 Enterprise**: Gerenciamento de empresas\n- **👤 Customer**: Gerenciamento de clientes\n- **📦 Product**: Gerenciamento de produtos\n- **🛒 Order**: Gerenciamento de pedidos\n\n## ⚠️ Códigos de Resposta\n\n- `200` - Sucesso (GET, PUT, PATCH)\n- `201` - Criado com sucesso (POST)\n- `204` - Sem conteúdo (DELETE)\n- `400` - Dados inválidos\n- `401` - Não autorizado (credenciais inválidas ou token ausente)\n- `404` - Recurso não encontrado\n- `409` - Conflito (recurso já existe)\n\n## 🔧 Validações Implementadas\n\nCada endpoint inclui exemplos de:\n- ✅ Requisições de sucesso\n- ❌ Validações de erro (400, 404, 409)\n\n## 📝 Notas\n\n- Todos os IDs são UUIDs v4\n- Datas devem estar no formato ISO 8601\n- Valores monetários são armazenados com até 2 casas decimais\n- Uploads de arquivos devem ser enviados como form-data",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": {
+      "major": 1,
+      "minor": 1,
+      "patch": 0
+    }
+  },
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "Endpoints para autenticação e autorização. Permite registrar novos usuários, fazer login, obter perfil e fazer logout.\n\n**Endpoints:**\n- `POST /auth/register`: Registra um novo usuário\n- `POST /auth/login`: Faz login e retorna token JWT\n- `GET /auth/profile`: Obtém perfil do usuário autenticado\n- `POST /auth/logout`: Faz logout\n\n**Autenticação:**\n- Login e Register retornam um `access_token` JWT\n- Use o token no header `Authorization: Bearer {token}` para acessar endpoints protegidos\n- O token é automaticamente salvo na variável `access_token` após login/registro\n\n**Validações:**\n- Email deve ser válido e único\n- Senha deve ter no mínimo 6 caracteres\n- Usuário inativo não pode fazer login",
+      "item": [
+        {
+          "name": "Register",
+          "description": "Registra um novo usuário no sistema.\n\n**Método:** POST\n**Endpoint:** `/auth/register`\n\n**Body (JSON):**\n```json\n{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"senha123\"\n}\n```\n\n**Resposta de Sucesso (201):**\n```json\n{\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"uuid\",\n    \"name\": \"João Silva\",\n    \"email\": \"joao.silva@example.com\",\n    \"role\": \"user\",\n    \"isActive\": true,\n    \"createdAt\": \"2024-01-15T10:30:00Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00Z\"\n  }\n}\n```\n\n**Resposta de Erro (409):** Se o email já estiver em uso",
+          "item": [
+            {
+              "name": "✅ 201 - Sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has access_token\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('access_token');",
+                      "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has user\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('user');",
+                      "    pm.expect(jsonData.user).to.have.property('id');",
+                      "    pm.expect(jsonData.user).to.have.property('email');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Email inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"email-invalido\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Senha muito curta",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              }
+            },
+            {
+              "name": "❌ 409 - Email já existe",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "register"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "description": "Faz login e retorna um token JWT.\n\n**Método:** POST\n**Endpoint:** `/auth/login`\n\n**Body (JSON):**\n```json\n{\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"senha123\"\n}\n```\n\n**Resposta de Sucesso (200):**\n```json\n{\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"uuid\",\n    \"name\": \"João Silva\",\n    \"email\": \"joao.silva@example.com\",\n    \"role\": \"user\",\n    \"isActive\": true,\n    \"createdAt\": \"2024-01-15T10:30:00Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00Z\"\n  }\n}\n```\n\n**Resposta de Erro (401):** Se as credenciais forem inválidas ou o usuário estiver inativo",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has access_token\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('access_token');",
+                      "    pm.collectionVariables.set('access_token', jsonData.access_token);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has user\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('user');",
+                      "    pm.expect(jsonData.user).to.have.property('id');",
+                      "    pm.expect(jsonData.user).to.have.property('email');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Email inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"email-invalido\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "❌ 401 - Credenciais inválidas",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"joao.silva@example.com\",\n  \"password\": \"senhaerrada\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            },
+            {
+              "name": "❌ 401 - Usuário não encontrado",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"naoexiste@example.com\",\n  \"password\": \"senha123\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "login"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "description": "Obtém o perfil do usuário autenticado.\n\n**Método:** GET\n**Endpoint:** `/auth/profile`\n\n**Headers:**\n- `Authorization: Bearer {access_token}`\n\n**Resposta de Sucesso (200):**\n```json\n{\n  \"id\": \"uuid\",\n  \"name\": \"João Silva\",\n  \"email\": \"joao.silva@example.com\",\n  \"role\": \"user\",\n  \"isActive\": true,\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00Z\"\n}\n```\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "profile"]
+                }
+              }
+            },
+            {
+              "name": "❌ 401 - Token ausente",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "profile"]
+                }
+              }
+            },
+            {
+              "name": "❌ 401 - Token inválido",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer token_invalido_123",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "profile"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "description": "Faz logout do usuário autenticado.\n\n**Método:** POST\n**Endpoint:** `/auth/logout`\n\n**Headers:**\n- `Authorization: Bearer {access_token}`\n\n**Resposta de Sucesso (200):**\n```json\n{\n  \"message\": \"Logout realizado com sucesso\"\n}\n```\n\n**Nota:** Em uma implementação mais robusta, o token poderia ser adicionado a uma blacklist.",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "logout"]
+                }
+              }
+            },
+            {
+              "name": "❌ 401 - Token ausente",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["auth", "logout"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🏢 Enterprise",
+      "description": "Endpoints para gerenciamento de empresas. Permite criar, listar, atualizar, excluir empresas e fazer upload de logos.\n\n**Autenticação:**\n- Rotas GET (listar/buscar) são públicas\n- Rotas POST, PUT, DELETE requerem autenticação JWT\n- Use o header `Authorization: Bearer {{access_token}}`\n\n**Campos obrigatórios:**\n- `legalName`: Razão social (mínimo 3 caracteres)\n- `tradeName`: Nome fantasia\n- `cnpj`: CNPJ válido (formato: XX.XXX.XXX/XXXX-XX)\n- `foundationDate`: Data de fundação (formato: YYYY-MM-DD, não pode ser futura)\n- `address`: Endereço completo\n\n**Validações:**\n- CNPJ deve ser válido e único\n- Data de fundação não pode ser futura\n- Empresa não pode ser excluída se tiver produtos ou pedidos associados",
+      "item": [
+        {
+          "name": "Create Enterprise",
+          "description": "Cria uma nova empresa no sistema.\n\n**Método:** POST\n**Endpoint:** `/enterprises`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Body (JSON):**\n```json\n{\n  \"legalName\": \"Tech Solutions Ltda\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\"\n}\n```\n\n**Resposta de Sucesso (201):**\n```json\n{\n  \"id\": \"uuid\",\n  \"legalName\": \"Tech Solutions Ltda\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00Z\"\n}\n```\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 201 - Sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has id\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('id');",
+                      "    pm.collectionVariables.set('enterpriseId', jsonData.id);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has required fields\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('legalName');",
+                      "    pm.expect(jsonData).to.have.property('tradeName');",
+                      "    pm.expect(jsonData).to.have.property('cnpj');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"Tech Solutions Ltda\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Razão social muito curta",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"AB\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - CNPJ inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"Tech Solutions Ltda\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.111.111/1111-11\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Data de fundação futura",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"Tech Solutions Ltda\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2025-12-31\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises"]
+                }
+              }
+            },
+            {
+              "name": "❌ 409 - CNPJ já existe",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"Outra Empresa Ltda\",\n  \"tradeName\": \"OutraEmp\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Enterprises",
+          "description": "Lista todas as empresas cadastradas no sistema.\n\n**Método:** GET\n**Endpoint:** `/enterprises`\n\n**Resposta de Sucesso (200):**\n```json\n[\n  {\n    \"id\": \"uuid\",\n    \"legalName\": \"Tech Solutions Ltda\",\n    \"tradeName\": \"TechSol\",\n    \"cnpj\": \"11.222.333/0001-81\",\n    \"foundationDate\": \"2020-01-15\",\n    \"address\": \"Rua das Flores, 123\",\n    \"createdAt\": \"2024-01-15T10:30:00Z\",\n    \"updatedAt\": \"2024-01-15T10:30:00Z\"\n  }\n]\n```",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/enterprises",
+              "host": ["{{baseUrl}}"],
+              "path": ["enterprises"]
+            }
+          }
+        },
+        {
+          "name": "Get Enterprise by ID",
+          "description": "Busca uma empresa específica pelo ID.\n\n**Método:** GET\n**Endpoint:** `/enterprises/:id`\n\n**Parâmetros:**\n- `id` (path): UUID da empresa\n\n**Resposta de Sucesso (200):**\n```json\n{\n  \"id\": \"uuid\",\n  \"legalName\": \"Tech Solutions Ltda\",\n  \"tradeName\": \"TechSol\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 123\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00Z\"\n}\n```\n\n**Resposta de Erro (404):**\n```json\n{\n  \"statusCode\": 404,\n  \"message\": \"Empresa não encontrada\",\n  \"error\": \"Not Found\"\n}\n```",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Empresa não encontrada",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "00000000-0000-0000-0000-000000000000"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Enterprise",
+          "description": "Atualiza os dados de uma empresa existente.\n\n**Método:** PUT\n**Endpoint:** `/enterprises/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Parâmetros:**\n- `id` (path): UUID da empresa\n\n**Body (JSON):** Mesma estrutura do POST, todos os campos são opcionais\n\n**Resposta de Sucesso (200):** Retorna a empresa atualizada\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"Tech Solutions Atualizada Ltda\",\n  \"tradeName\": \"TechSol Pro\",\n  \"cnpj\": \"11.222.333/0001-81\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 456, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - CNPJ inválido",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"legalName\": \"Tech Solutions Atualizada Ltda\",\n  \"tradeName\": \"TechSol Pro\",\n  \"cnpj\": \"11.111.111/1111-11\",\n  \"foundationDate\": \"2020-01-15\",\n  \"address\": \"Rua das Flores, 456, Centro, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Enterprise",
+          "description": "Exclui uma empresa do sistema.\n\n**Método:** DELETE\n**Endpoint:** `/enterprises/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n\n**Parâmetros:**\n- `id` (path): UUID da empresa\n\n**Resposta de Sucesso (204):** Sem conteúdo\n\n**Resposta de Erro (400):** Se a empresa tiver produtos ou pedidos associados\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 204 - Sucesso",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Empresa com produtos/pedidos",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseIdWithProducts}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseIdWithProducts}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Logo",
+          "description": "Faz upload da logo de uma empresa.\n\n**Método:** POST\n**Endpoint:** `/enterprises/:id/logo`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n\n**Parâmetros:**\n- `id` (path): UUID da empresa\n\n**Body (form-data):**\n- `file`: Arquivo de imagem (PNG, JPG, JPEG)\n\n**Resposta de Sucesso (200):** Retorna a empresa com a URL da logo atualizada\n\n**Resposta de Erro (400):** Se o tipo de arquivo for inválido\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "logo.png"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseId}}/logo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseId}}", "logo"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Tipo de arquivo inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "document.pdf"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/enterprises/{{enterpriseId}}/logo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["enterprises", "{{enterpriseId}}", "logo"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "👤 Customer",
+      "description": "Endpoints para gerenciamento de clientes. Permite criar, listar, atualizar, excluir clientes e fazer upload de fotos.\n\n**Autenticação:**\n- Rotas GET (listar/buscar) são públicas\n- Rotas POST, PUT, DELETE requerem autenticação JWT\n- Use o header `Authorization: Bearer {{access_token}}`\n\n**Campos obrigatórios:**\n- `name`: Nome completo (mínimo 3 caracteres)\n- `email`: Email válido e único\n- `phone`: Telefone (formato: (XX) XXXXX-XXXX)\n- `cpf`: CPF válido (formato: XXX.XXX.XXX-XX)\n- `address`: Endereço completo\n\n**Validações:**\n- Email deve ser válido e único\n- CPF deve ser válido\n- Telefone deve estar em formato válido\n- Cliente não pode ser excluído se tiver pedidos associados",
+      "item": [
+        {
+          "name": "Create Customer",
+          "description": "Cria um novo cliente no sistema.\n\n**Método:** POST\n**Endpoint:** `/customers`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Body (JSON):**\n```json\n{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"(11) 99999-8888\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}\n```\n\n**Resposta de Sucesso (201):**\n```json\n{\n  \"id\": \"uuid\",\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"(11) 99999-8888\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 456\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00Z\"\n}\n```\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 201 - Sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has id\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('id');",
+                      "    pm.collectionVariables.set('customerId', jsonData.id);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has required fields\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('name');",
+                      "    pm.expect(jsonData).to.have.property('email');",
+                      "    pm.expect(jsonData).to.have.property('cpf');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"(11) 99999-8888\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Nome muito curto",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"J\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"(11) 99999-8888\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - CPF inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"(11) 99999-8888\",\n  \"cpf\": \"111.111.111-11\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Email inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"email-invalido\",\n  \"phone\": \"(11) 99999-8888\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Telefone inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Santos\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"123456\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              }
+            },
+            {
+              "name": "❌ 409 - Email já existe",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Maria Santos\",\n  \"email\": \"joao.silva@gmail.com\",\n  \"phone\": \"(11) 88888-7777\",\n  \"cpf\": \"987.654.321-00\",\n  \"address\": \"Rua das Palmeiras, 456, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Customers",
+          "description": "Lista todos os clientes cadastrados no sistema.\n\n**Método:** GET\n**Endpoint:** `/customers`\n\n**Resposta de Sucesso (200):** Array com todos os clientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers",
+              "host": ["{{baseUrl}}"],
+              "path": ["customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "description": "Busca um cliente específico pelo ID.\n\n**Método:** GET\n**Endpoint:** `/customers/:id`\n\n**Parâmetros:**\n- `id` (path): UUID do cliente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Cliente não encontrado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "00000000-0000-0000-0000-000000000000"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Customer",
+          "description": "Atualiza os dados de um cliente existente.\n\n**Método:** PUT\n**Endpoint:** `/customers/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Parâmetros:**\n- `id` (path): UUID do cliente\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Santos Atualizado\",\n  \"email\": \"joao.silva.novo@gmail.com\",\n  \"phone\": \"(11) 88888-7777\",\n  \"cpf\": \"123.456.789-09\",\n  \"address\": \"Rua das Palmeiras, 789, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - CPF inválido",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"João Silva Santos Atualizado\",\n  \"email\": \"joao.silva.novo@gmail.com\",\n  \"phone\": \"(11) 88888-7777\",\n  \"cpf\": \"111.111.111-11\",\n  \"address\": \"Rua das Palmeiras, 789, Jardim Paulista, São Paulo - SP\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Customer",
+          "description": "Exclui um cliente do sistema.\n\n**Método:** DELETE\n**Endpoint:** `/customers/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n\n**Parâmetros:**\n- `id` (path): UUID do cliente\n\n**Resposta de Sucesso (204):** Sem conteúdo\n\n**Resposta de Erro (400):** Se o cliente tiver pedidos associados\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 204 - Sucesso",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Cliente com pedidos",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerIdWithOrders}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerIdWithOrders}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Photo",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "photo.jpg"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerId}}/photo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerId}}", "photo"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Arquivo muito grande",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "large_photo.jpg"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/customers/{{customerId}}/photo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["customers", "{{customerId}}", "photo"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📦 Product",
+      "description": "Endpoints para gerenciamento de produtos. Permite criar, listar, atualizar, excluir produtos, atualizar estoque e fazer upload de fotos.\n\n**Autenticação:**\n- Rotas GET (listar/buscar) são públicas\n- Rotas POST, PUT, DELETE, PATCH requerem autenticação JWT\n- Use o header `Authorization: Bearer {{access_token}}`\n\n**Campos obrigatórios:**\n- `name`: Nome do produto (mínimo 2 caracteres, único por empresa)\n- `description`: Descrição do produto\n- `price`: Preço (≥ 0, até 2 casas decimais)\n- `stock`: Estoque (≥ 0, número inteiro)\n- `enterpriseId`: UUID da empresa\n\n**Validações:**\n- Preço não pode ser negativo\n- Estoque não pode ser negativo\n- Nome deve ser único por empresa\n- Empresa deve existir",
+      "item": [
+        {
+          "name": "Create Product",
+          "description": "Cria um novo produto no sistema.\n\n**Método:** POST\n**Endpoint:** `/products`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Body (JSON):**\n```json\n{\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB\",\n  \"price\": 2499.99,\n  \"stock\": 50,\n  \"enterpriseId\": \"uuid\"\n}\n```\n\n**Resposta de Sucesso (201):**\n```json\n{\n  \"id\": \"uuid\",\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB\",\n  \"price\": 2499.99,\n  \"stock\": 50,\n  \"enterpriseId\": \"uuid\",\n  \"createdAt\": \"2024-01-15T10:30:00Z\",\n  \"updatedAt\": \"2024-01-15T10:30:00Z\"\n}\n```\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 201 - Sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has id\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('id');",
+                      "    pm.collectionVariables.set('productId', jsonData.id);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has required fields\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('name');",
+                      "    pm.expect(jsonData).to.have.property('price');",
+                      "    pm.expect(jsonData).to.have.property('stock');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB de armazenamento e câmera de 50MP\",\n  \"price\": 2499.99,\n  \"stock\": 50,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Nome muito curto",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"A\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB de armazenamento e câmera de 50MP\",\n  \"price\": 2499.99,\n  \"stock\": 50,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Preço negativo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB de armazenamento e câmera de 50MP\",\n  \"price\": -100,\n  \"stock\": 50,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Estoque negativo",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB de armazenamento e câmera de 50MP\",\n  \"price\": 2499.99,\n  \"stock\": -10,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Empresa não encontrada",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Smartphone Samsung Galaxy S23 com 128GB de armazenamento e câmera de 50MP\",\n  \"price\": 2499.99,\n  \"stock\": 50,\n  \"enterpriseId\": \"00000000-0000-0000-0000-000000000000\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              }
+            },
+            {
+              "name": "❌ 409 - Nome já existe na empresa",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23\",\n  \"description\": \"Outro smartphone com mesmo nome\",\n  \"price\": 1999.99,\n  \"stock\": 30,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Stock",
+          "description": "Atualiza o estoque de um produto. Use valores positivos para adicionar e negativos para remover.\n\n**Método:** PATCH\n**Endpoint:** `/products/:id/stock`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Parâmetros:**\n- `id` (path): UUID do produto\n\n**Body (JSON):**\n```json\n{\n  \"quantity\": 25\n}\n```\n\n**Resposta de Sucesso (200):** Retorna o produto com estoque atualizado\n\n**Resposta de Erro (400):** Se a quantidade resultar em estoque negativo\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Adicionar estoque",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 25\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}/stock",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}", "stock"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Estoque insuficiente",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": -1000\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}/stock",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}", "stock"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Products",
+          "description": "Lista todos os produtos cadastrados. Pode ser filtrado por empresa usando query parameter.\n\n**Método:** GET\n**Endpoint:** `/products`\n\n**Query Parameters (opcionais):**\n- `enterpriseId`: Filtra produtos por empresa\n\n**Exemplos:**\n- `GET /products` - Lista todos os produtos\n- `GET /products?enterpriseId=uuid` - Lista produtos de uma empresa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "description": "Busca um produto específico pelo ID.\n\n**Método:** GET\n**Endpoint:** `/products/:id`\n\n**Parâmetros:**\n- `id` (path): UUID do produto",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Produto não encontrado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "00000000-0000-0000-0000-000000000000"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Product",
+          "description": "Atualiza os dados de um produto existente.\n\n**Método:** PUT\n**Endpoint:** `/products/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Parâmetros:**\n- `id` (path): UUID do produto\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23 Ultra\",\n  \"description\": \"Smartphone Samsung Galaxy S23 Ultra com 256GB de armazenamento e câmera de 108MP\",\n  \"price\": 3499.99,\n  \"stock\": 30,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Preço inválido",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Smartphone Galaxy S23 Ultra\",\n  \"description\": \"Smartphone Samsung Galaxy S23 Ultra com 256GB de armazenamento e câmera de 108MP\",\n  \"price\": -500,\n  \"stock\": 30,\n  \"enterpriseId\": \"{{enterpriseId}}\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Product",
+          "description": "Exclui um produto do sistema.\n\n**Método:** DELETE\n**Endpoint:** `/products/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n\n**Parâmetros:**\n- `id` (path): UUID do produto\n\n**Resposta de Sucesso (204):** Sem conteúdo\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 204 - Sucesso",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Produto não encontrado",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "00000000-0000-0000-0000-000000000000"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Photo",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "product.jpg"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}/photo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}", "photo"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Tipo de arquivo inválido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "src": "document.txt"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/products/{{productId}}/photo",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["products", "{{productId}}", "photo"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🛒 Order",
+      "description": "Endpoints para gerenciamento de pedidos. Permite criar, listar, atualizar, excluir pedidos e atualizar status.\n\n**Autenticação:**\n- Rotas GET (listar/buscar) são públicas\n- Rotas POST, PUT, DELETE, PATCH requerem autenticação JWT\n- Use o header `Authorization: Bearer {{access_token}}`\n\n**Campos obrigatórios:**\n- `orderNumber`: Número do pedido (único)\n- `orderDate`: Data do pedido (formato ISO 8601, não pode ser futura)\n- `customerId`: UUID do cliente\n- `enterpriseId`: UUID da empresa\n- `totalAmount`: Valor total (≥ valor mínimo, geralmente R$ 10,00)\n- `items`: Array com pelo menos um item\n\n**Validações:**\n- Número do pedido deve ser único\n- Data não pode ser futura\n- Total deve corresponder à soma dos itens\n- Valor mínimo do pedido deve ser respeitado\n- Não pode haver produtos duplicados no pedido\n- Estoque deve ser suficiente para todos os itens\n- Pedidos finalizados não podem ser alterados ou excluídos\n\n**Status disponíveis:**\n- `pending`: Pendente\n- `completed`: Completo\n- `cancelled`: Cancelado",
+      "item": [
+        {
+          "name": "Create Order",
+          "description": "Cria um novo pedido no sistema.\n\n**Método:** POST\n**Endpoint:** `/orders`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Body (JSON):**\n```json\n{\n  \"orderNumber\": \"PED-2024-001\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"uuid\",\n  \"enterpriseId\": \"uuid\",\n  \"totalAmount\": 2499.99,\n  \"notes\": \"Entrega urgente\",\n  \"items\": [\n    {\n      \"productId\": \"uuid\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}\n```\n\n**Resposta de Sucesso (201):**\n```json\n{\n  \"id\": \"uuid\",\n  \"orderNumber\": \"PED-2024-001\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"status\": \"pending\",\n  \"customerId\": \"uuid\",\n  \"enterpriseId\": \"uuid\",\n  \"totalAmount\": 2499.99,\n  \"items\": [...],\n  \"createdAt\": \"2024-01-15T10:30:00Z\"\n}\n```\n\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 201 - Sucesso",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 201\", function () {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has id\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('id');",
+                      "    pm.collectionVariables.set('orderId', jsonData.id);",
+                      "});",
+                      "",
+                      "pm.test(\"Response has required fields\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData).to.have.property('orderNumber');",
+                      "    pm.expect(jsonData).to.have.property('totalAmount');",
+                      "    pm.expect(jsonData).to.have.property('items');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-001\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2499.99,\n  \"notes\": \"Entrega urgente\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Produtos duplicados",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-002\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 4999.98,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    },\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Total incorreto",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-003\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 1000.00,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Valor mínimo não atingido",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-004\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2.00,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Produto Barato\",\n      \"quantity\": 1,\n      \"unitPrice\": 2.00,\n      \"subtotal\": 2.00\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Data futura",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-005\",\n  \"orderDate\": \"2025-12-31T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2499.99,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Estoque insuficiente",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-006\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 249999.00,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 100,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 249999.00\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Cliente não encontrado",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-007\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"00000000-0000-0000-0000-000000000000\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2499.99,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            },
+            {
+              "name": "❌ 409 - Número do pedido já existe",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-001\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2499.99,\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2499.99,\n      \"subtotal\": 2499.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get All Orders",
+          "description": "Lista todos os pedidos cadastrados. Pode ser filtrado por cliente ou empresa usando query parameters.\n\n**Método:** GET\n**Endpoint:** `/orders`\n\n**Query Parameters (opcionais):**\n- `customerId`: Filtra por cliente\n- `enterpriseId`: Filtra por empresa\n\n**Exemplos:**\n- `GET /orders` - Lista todos os pedidos\n- `GET /orders?customerId=uuid` - Lista pedidos de um cliente\n- `GET /orders?enterpriseId=uuid` - Lista pedidos de uma empresa",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "description": "Busca um pedido específico pelo ID.\n\n**Método:** GET\n**Endpoint:** `/orders/:id`\n\n**Parâmetros:**\n- `id` (path): UUID do pedido",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{orderId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 404 - Pedido não encontrado",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/00000000-0000-0000-0000-000000000000",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "00000000-0000-0000-0000-000000000000"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Order Status",
+          "description": "Atualiza o status de um pedido.\n\n**Método:** PATCH\n**Endpoint:** `/orders/:id/status`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Parâmetros:**\n- `id` (path): UUID do pedido\n\n**Body (JSON):**\n```json\n{\n  \"status\": \"completed\"\n}\n```\n\n**Status válidos:**\n- `pending`: Pendente\n- `completed`: Completo\n- `cancelled`: Cancelado\n\n**Resposta de Sucesso (200):** Retorna o pedido com status atualizado\n\n**Resposta de Erro (400):** Se o status for inválido ou o pedido já estiver finalizado\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Completar pedido",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"Order status is completed\", function () {",
+                      "    var jsonData = pm.response.json();",
+                      "    pm.expect(jsonData.status).to.eql('completed');",
+                      "    pm.collectionVariables.set('completedOrderId', jsonData.id);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"completed\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{orderId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "✅ 200 - Cancelar pedido",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"cancelled\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{orderId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Status inválido",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"invalid_status\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{orderId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{orderId}}", "status"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Pedido já finalizado",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"completed\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{completedOrderId}}/status",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{completedOrderId}}", "status"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Order",
+          "description": "Atualiza os dados de um pedido existente.\n\n**Método:** PUT\n**Endpoint:** `/orders/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n- `Content-Type: application/json`\n\n**Parâmetros:**\n- `id` (path): UUID do pedido\n\n**Body (JSON):** Mesma estrutura do POST\n\n**Resposta de Sucesso (200):** Retorna o pedido atualizado\n\n**Resposta de Erro (400):** Se o pedido estiver finalizado (completed ou cancelled)\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 200 - Sucesso",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-001-UPD\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2999.99,\n  \"notes\": \"Entrega urgente - Atualizado\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2999.99,\n      \"subtotal\": 2999.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{orderId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Pedido finalizado não pode ser alterado",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"orderNumber\": \"PED-2024-001-UPD\",\n  \"orderDate\": \"2024-01-15T10:30:00Z\",\n  \"customerId\": \"{{customerId}}\",\n  \"enterpriseId\": \"{{enterpriseId}}\",\n  \"totalAmount\": 2999.99,\n  \"notes\": \"Tentativa de alterar pedido finalizado\",\n  \"items\": [\n    {\n      \"productId\": \"{{productId}}\",\n      \"productName\": \"Smartphone Galaxy S23\",\n      \"quantity\": 1,\n      \"unitPrice\": 2999.99,\n      \"subtotal\": 2999.99\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{completedOrderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{completedOrderId}}"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Order",
+          "description": "Exclui um pedido do sistema.\n\n**Método:** DELETE\n**Endpoint:** `/orders/:id`\n**Autenticação:** Requerida (JWT)\n\n**Headers:**\n- `Authorization: Bearer {{access_token}}`\n\n**Parâmetros:**\n- `id` (path): UUID do pedido\n\n**Resposta de Sucesso (204):** Sem conteúdo\n\n**Resposta de Erro (400):** Se o pedido estiver finalizado (completed ou cancelled)\n**Resposta de Erro (401):** Se o token for inválido ou ausente",
+          "item": [
+            {
+              "name": "✅ 204 - Sucesso",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{orderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{orderId}}"]
+                }
+              }
+            },
+            {
+              "name": "❌ 400 - Pedido finalizado não pode ser excluído",
+              "request": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{access_token}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{completedOrderId}}",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["orders", "{{completedOrderId}}"]
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "enterpriseId",
+      "value": ""
+    },
+    {
+      "key": "enterpriseIdWithProducts",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "customerIdWithOrders",
+      "value": ""
+    },
+    {
+      "key": "productId",
+      "value": ""
+    },
+    {
+      "key": "orderId",
+      "value": ""
+    },
+    {
+      "key": "completedOrderId",
+      "value": ""
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ]
+} 

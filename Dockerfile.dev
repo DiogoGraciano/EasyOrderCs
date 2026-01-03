@@ -1,0 +1,28 @@
+# Dockerfile para desenvolvimento com hot reload
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+
+WORKDIR /app
+
+# Install EF Core tools e PostgreSQL client para healthcheck
+RUN dotnet tool install --global dotnet-ef --version 10.0.1 && \
+    apt-get update && \
+    apt-get install -y postgresql-client && \
+    rm -rf /var/lib/apt/lists/*
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Expor portas
+EXPOSE 8080
+EXPOSE 8081
+
+# O código será montado como volume no docker-compose
+# Apenas copiamos o csproj para restaurar dependências
+COPY ["EasyOrderCs.csproj", "./"]
+RUN dotnet restore "EasyOrderCs.csproj"
+
+# Copiar entrypoint
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+
+# Comando padrão - será sobrescrito no docker-compose para watch
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+

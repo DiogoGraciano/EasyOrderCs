@@ -1,0 +1,6 @@
+@EasyOrderCs_HostAddress = http://localhost:5027
+
+GET {{EasyOrderCs_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,13 @@
+version: '3.8'
+
+# Este arquivo pode ser copiado para docker-compose.override.yml
+# para personalizar configurações locais sem afetar o repositório
+
+services:
+  api:
+    environment:
+      # Sobrescreva variáveis de ambiente aqui se necessário
+      - ASPNETCORE_ENVIRONMENT=Development
+      # Exemplo: usar banco de dados local
+      # - DB_HOST=localhost
+      # - DB_PORT=5432
