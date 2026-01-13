@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EasyOrderCs")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f03fd7b99efc730c08ec7548a44897027f43404")]
 [assembly: System.Reflection.AssemblyProductAttribute("EasyOrderCs")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EasyOrderCs")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
